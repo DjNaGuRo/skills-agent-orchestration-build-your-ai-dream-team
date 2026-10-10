@@ -1,0 +1,52 @@
+{
+  "projects": [
+    {
+      "name": "Mona Metrics Explorer",
+      "owner": "Mona",
+      "status": "active",
+      "recentActivity": "Merged the first pass at repository health scoring and opened follow-up issues for API pagination.",
+      "priority": "high",
+      "summary": "Surfaces contribution trends so maintainers can spot where help is needed."
+    },
+    {
+      "name": "Octo Onboarding Trails",
+      "owner": "Hubot",
+      "status": "at-risk",
+      "recentActivity": "Design review found confusing labels in the first-run checklist.",
+      "priority": "medium",
+      "summary": "Guides new contributors through a friendly setup path with project-specific tips."
+    },
+    {
+      "name": "Issue Triage Copilot",
+      "owner": "Keisha",
+      "status": "blocked",
+      "recentActivity": "Waiting on final approval for the shared label taxonomy before training examples can be refreshed.",
+      "priority": "high",
+      "summary": "Helps maintainers group incoming issues, identify duplicates, and suggest next actions without replacing human review."
+    },
+    {
+      "name": "Actions Observatory",
+      "owner": "Ravi",
+      "status": "paused",
+      "recentActivity": "Load testing is paused while the runner cost estimate is revised.",
+      "priority": "low",
+      "summary": "Tracks workflow reliability and highlights flaky automation across Mona's busiest repositories."
+    },
+    {
+      "name": "Contributor Kudos Board",
+      "owner": "Avery",
+      "status": "completed",
+      "recentActivity": "Shipped the accessibility fixes and published the handoff notes for community managers.",
+      "priority": "medium",
+      "summary": "Celebrates first-time contributors and recurring helpers with a dashboard suitable for release notes."
+    },
+    {
+      "name": "Release Radar for Octoverse Labs",
+      "owner": "Mona and the Octocats",
+      "status": "active",
+      "recentActivity": "Collected a long-form status update from the release captain: the dependency audit is green, the docs screenshots are refreshed, localization contributors have queued translations for review, and the only remaining task is confirming that the launch checklist still reflects the renamed preview environment.",
+      "priority": "high",
+      "summary": "Coordinates launch readiness across documentation, automation, localization, and community announcement workstreams."
+    }
+  ]
+}

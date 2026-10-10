@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="page-header">
+      <h1 class="page-title">Project Pulse</h1>
+      <p class="page-subtitle">A quick view of Mona's most important GitHub projects, their owners, and their latest momentum.</p>
+    </header>
+
+    <main>
+      <div id="state" class="state-message">Loading project pulse data…</div>
+      <section class="dashboard" aria-label="Project cards"></section>
+    </main>
+
+    <script>
+      const dataUrl = "project-data.json";
+      const allowedStatuses = ["active", "at-risk", "blocked", "paused", "completed"];
+      const allowedPriorities = ["high", "medium", "low"];
+
+      const stateElement = document.getElementById("state");
+      const dashboardElement = document.querySelector(".dashboard");
+
+      function getStringValue(value, fallback) {
+        if (typeof value !== "string") {
+          return fallback;
+        }
+
+        const trimmedValue = value.trim();
+        return trimmedValue === "" ? fallback : trimmedValue;
+      }
+
+      function normalizeSuffix(value, allowedValues) {
+        const normalizedValue = getStringValue(value, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+        if (allowedValues.includes(normalizedValue)) {
+          return normalizedValue;
+        }
+
+        return "unknown";
+      }
+
+      function formatLabel(value, fallback) {
+        const safeValue = getStringValue(value, fallback).replace(/-/g, " ");
+        return safeValue.replace(/\b\w/g, function capitalizeLetter(letter) {
+          return letter.toUpperCase();
+        });
+      }
+
+      function setState(message, modifierClass) {
+        stateElement.textContent = message;
+        stateElement.hidden = false;
+        stateElement.classList.remove("state-error", "state-empty");
+
+        if (modifierClass) {
+          stateElement.classList.add(modifierClass);
+        }
+      }
+
+      function clearState() {
+        stateElement.textContent = "";
+        stateElement.hidden = true;
+        stateElement.classList.remove("state-error", "state-empty");
+      }
+
+      function createParagraph(className, label, value) {
+        const paragraph = document.createElement("p");
+        paragraph.className = className;
+        paragraph.textContent = label + value;
+        return paragraph;
+      }
+
+      function createProjectCard(project) {
+        const statusSuffix = normalizeSuffix(project.status, allowedStatuses);
+        const prioritySuffix = normalizeSuffix(project.priority, allowedPriorities);
+        const projectName = getStringValue(project.name, "Untitled project");
+        const owner = getStringValue(project.owner, "Unassigned");
+        const activity = getStringValue(project.recentActivity, "No recent activity");
+        const summary = getStringValue(project.summary, "");
+
+        const card = document.createElement("article");
+        card.className = "project-card";
+        card.dataset.status = statusSuffix;
+        card.dataset.priority = prioritySuffix;
+
+        const nameHeading = document.createElement("h2");
+        nameHeading.className = "project-name";
+        nameHeading.textContent = projectName;
+        card.appendChild(nameHeading);
+
+        const badges = document.createElement("div");
+        badges.className = "project-badges";
+
+        const statusBadge = document.createElement("span");
+        statusBadge.className = "status-badge status-" + statusSuffix;
+        statusBadge.textContent = "Status: " + formatLabel(project.status, "Unknown");
+        badges.appendChild(statusBadge);
+
+        const priorityBadge = document.createElement("span");
+        priorityBadge.className = "priority priority-" + prioritySuffix;
+        priorityBadge.textContent = "Priority: " + formatLabel(project.priority, "Unknown");
+        badges.appendChild(priorityBadge);
+
+        card.appendChild(badges);
+        card.appendChild(createParagraph("project-owner", "Owner: ", owner));
+        card.appendChild(createParagraph("project-activity", "Recent activity: ", activity));
+
+        if (summary !== "") {
+          const summaryParagraph = document.createElement("p");
+          summaryParagraph.className = "project-summary";
+          summaryParagraph.textContent = summary;
+          card.appendChild(summaryParagraph);
+        }
+
+        return card;
+      }
+
+      function renderProjects(projects) {
+        dashboardElement.textContent = "";
+
+        projects.forEach(function appendProject(project) {
+          dashboardElement.appendChild(createProjectCard(project || {}));
+        });
+
+        clearState();
+      }
+
+      async function loadProjects() {
+        setState("Loading project pulse data…");
+
+        let response;
+        try {
+          response = await fetch(dataUrl);
+        } catch (error) {
+          setState("Could not load project-data.json. Start a local web server, such as the included Project Pulse launch configuration, and open the page over http:// instead of file://.", "state-error");
+          return;
+        }
+
+        if (!response.ok) {
+          setState("Could not load project-data.json. The server returned HTTP " + response.status + ". Make sure a local web server is serving the app directory.", "state-error");
+          return;
+        }
+
+        let data;
+        try {
+          data = JSON.parse(await response.text());
+        } catch (error) {
+          setState("project-data.json could not be parsed as valid JSON. Check for missing quotes, comments, or trailing commas.", "state-error");
+          return;
+        }
+
+        if (!data || !Array.isArray(data.projects)) {
+          setState("project-data.json must contain a top-level projects array.", "state-error");
+          return;
+        }
+
+        if (data.projects.length === 0) {
+          dashboardElement.textContent = "";
+          setState("No projects are available yet. Add project records to project-data.json to populate the dashboard.", "state-empty");
+          return;
+        }
+
+        renderProjects(data.projects);
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>
